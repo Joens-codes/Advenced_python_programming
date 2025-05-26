@@ -106,7 +106,7 @@ def get_preprocessor(num_cols, cat_cols):
     num_imputer = SimpleImputer(strategy='mean')  # 평균으로 결측치 대체
     cat_imputer = SimpleImputer(strategy='most_frequent')  # 가장 빈도가 높은 값으로 결측치 대체
     scaler = StandardScaler()
-    encoder = OneHotEncoder(handle_unknown='ignore', sparse=False)
+    encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
     
     return ColumnTransformer(
         transformers=[
@@ -216,7 +216,7 @@ def main():
     plot_missing_values(df, missing_plot_path)
     
     print("전처리 파이프라인 구성")
-    num_cols = ['soc_start', 'energy_kwh', 'temperature', 'duration_hr', 'charging_rate']
+    num_cols = ['soc_start', 'soc_end', 'energy_kwh', 'temperature', 'duration_hr', 'charging_rate']
     cat_cols = ['vehicle_model', 'user_type']
     preprocessor = get_preprocessor(num_cols, cat_cols)
     
@@ -235,6 +235,20 @@ def main():
     print("전처리 완료!")
     print(df_engineered.head())
 
+    print("결측치 정보:")
+    missing_info = check_missing_values(df_engineered)
+    print(missing_info)
+
+    print("결측치 제거 전 데이터 크기:", df_engineered.shape)
+    df_final = remove_missing_values(df_engineered)
+    print("결측치 제거 후 최종 데이터 크기:", df_final.shape)  
+    
+    print(df_engineered.head())
+
+    # 최종 데이터프레임을 CSV로 저장
+    df_final.to_csv("ev_charging_patterns_cleaned.csv", index=False)
+    print("전처리된 데이터가 'ev_charging_patterns_cleaned.csv'로 저장되었습니다.")
+    return df_final
 
 if __name__ == "__main__":
     main()
